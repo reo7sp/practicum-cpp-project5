@@ -1,14 +1,18 @@
 cmake_minimum_required(VERSION 3.30)
 project(GeometryApp VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # Не больше одной ошибки за раз
-    add_compile_options(-fmax-errors=1)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(-ferror-limit=1)
+    else()
+        add_compile_options(-fmax-errors=1)
+    endif()
 
     # Игнорируем ошибки matplotplusplus
     add_compile_options($<$<CXX_COMPILER_ID:GNU,Clang>:-Wno-deprecated-declarations>
@@ -31,6 +35,16 @@ CPMAddPackage(
     GITHUB_REPOSITORY alandefreitas/matplotplusplus
     GIT_TAG v1.2.2
 )
+
+set(_popen_cpp "${matplotplusplus_SOURCE_DIR}/source/matplot/util/popen.cpp")
+file(READ "${_popen_cpp}" _popen_content)
+if(NOT "${_popen_content}" MATCHES "#include <cstdlib>")
+    string(REPLACE
+        "#include <cstring> // strerror"
+        "#include <cstring> // strerror\n#include <cstdlib>"
+        _popen_content "${_popen_content}")
+    file(WRITE "${_popen_cpp}" "${_popen_content}")
+endif()
 
 file(GLOB HEADER_FILES "${CMAKE_SOURCE_DIR}/include/*.hpp")
 file(GLOB SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")

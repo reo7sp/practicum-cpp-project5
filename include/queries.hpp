@@ -1,6 +1,8 @@
 #pragma once
+
 #include "geometry.hpp"
 #include <algorithm>
+#include <limits>
 #include <optional>
 #include <variant>
 
@@ -14,9 +16,9 @@ struct Multilambda : Ts... {
 struct DistanceVisitor {
     Point2D point;
 
-    explicit DistanceVisitor(const Point2D &p) : point(p) {}
+    explicit DistanceVisitor(const Point2D& p) : point(p) {}
 
-    double operator()(const Line &line) const {
+    double operator()(const Line& line) const {
         Point2D line_vec = line.end - line.start;
         Point2D point_vec = point - line.start;
 
@@ -31,7 +33,7 @@ struct DistanceVisitor {
         return point.DistanceTo(projection);
     }
 
-    double operator()(const Triangle &triangle) const {
+    double operator()(const Triangle& triangle) const {
         auto vertices = triangle.Vertices();
         double min_distance = std::numeric_limits<double>::max();
 
@@ -43,7 +45,7 @@ struct DistanceVisitor {
         return min_distance;
     }
 
-    double operator()(const Rectangle &rect) const {
+    double operator()(const Rectangle& rect) const {
         auto vertices = rect.Vertices();
         double min_distance = std::numeric_limits<double>::max();
 
@@ -55,7 +57,7 @@ struct DistanceVisitor {
         return min_distance;
     }
 
-    double operator()(const RegularPolygon &polygon) const {
+    double operator()(const RegularPolygon& polygon) const {
         auto vertices = polygon.Vertices();
         double min_distance = std::numeric_limits<double>::max();
 
@@ -67,14 +69,14 @@ struct DistanceVisitor {
         return min_distance;
     }
 
-    double operator()(const Circle &circle) const {
+    double operator()(const Circle& circle) const {
         double center_distance = point.DistanceTo(circle.center_p);
         return std::max(0.0, center_distance - circle.radius);
     }
 
-    double operator()(const Polygon &polygon) const {
+    double operator()(const Polygon& polygon) const {
         double min_distance = std::numeric_limits<double>::max();
-        for (const auto &p : polygon.Vertices()) {
+        for (const auto& p : polygon.Vertices()) {
             min_distance = std::min(min_distance, point.DistanceTo(p));
         }
         return min_distance;
@@ -84,9 +86,9 @@ struct DistanceVisitor {
 struct PointToShapeDistanceVisitor {
     Point2D point;
 
-    explicit PointToShapeDistanceVisitor(const Point2D &p) : point(p) {}
+    explicit PointToShapeDistanceVisitor(const Point2D& p) : point(p) {}
 
-    double operator()(const Line &line) const {
+    double operator()(const Line& line) const {
         Point2D line_vec = line.end - line.start;
         Point2D point_vec = point - line.start;
 
@@ -101,7 +103,7 @@ struct PointToShapeDistanceVisitor {
         return point.DistanceTo(projection);
     }
 
-    double operator()(const Triangle &triangle) const {
+    double operator()(const Triangle& triangle) const {
         auto vertices = triangle.Vertices();
         double min_distance = std::numeric_limits<double>::max();
 
@@ -113,7 +115,7 @@ struct PointToShapeDistanceVisitor {
         return min_distance;
     }
 
-    double operator()(const Rectangle &rect) const {
+    double operator()(const Rectangle& rect) const {
         auto vertices = rect.Vertices();
         double min_distance = std::numeric_limits<double>::max();
 
@@ -125,7 +127,7 @@ struct PointToShapeDistanceVisitor {
         return min_distance;
     }
 
-    double operator()(const RegularPolygon &polygon) const {
+    double operator()(const RegularPolygon& polygon) const {
         auto vertices = polygon.Vertices();
         double min_distance = std::numeric_limits<double>::max();
 
@@ -137,14 +139,14 @@ struct PointToShapeDistanceVisitor {
         return min_distance;
     }
 
-    double operator()(const Circle &circle) const {
+    double operator()(const Circle& circle) const {
         double center_distance = point.DistanceTo(circle.center_p);
         return std::max(0.0, center_distance - circle.radius);
     }
 
-    double operator()(const Polygon &polygon) const {
+    double operator()(const Polygon& polygon) const {
         double min_distance = std::numeric_limits<double>::max();
-        for (const auto &p : polygon.Vertices()) {
+        for (const auto& p : polygon.Vertices()) {
             min_distance = std::min(min_distance, point.DistanceTo(p));
         }
         return min_distance;
@@ -154,9 +156,9 @@ struct PointToShapeDistanceVisitor {
 struct PointInShapeVisitor {
     Point2D point;
 
-    explicit PointInShapeVisitor(const Point2D &p) : point(p) {}
+    explicit PointInShapeVisitor(const Point2D& p) : point(p) {}
 
-    bool operator()(const Line &line) const {
+    bool operator()(const Line& line) const {
         Point2D line_vec = line.end - line.start;
         Point2D point_vec = point - line.start;
 
@@ -171,7 +173,7 @@ struct PointInShapeVisitor {
         return dot >= 0 && dot <= line_length_sq;
     }
 
-    bool operator()(const Triangle &triangle) const {
+    bool operator()(const Triangle& triangle) const {
         Point2D a = triangle.a;
         Point2D b = triangle.b;
         Point2D c = triangle.c;
@@ -186,20 +188,20 @@ struct PointInShapeVisitor {
         return !(has_neg && has_pos);
     }
 
-    bool operator()(const Rectangle &rect) const {
+    bool operator()(const Rectangle& rect) const {
         return point.x >= rect.bottom_left.x && point.x <= rect.bottom_left.x + rect.width &&
                point.y >= rect.bottom_left.y && point.y <= rect.bottom_left.y + rect.height;
     }
 
-    bool operator()(const RegularPolygon &polygon) const {
+    bool operator()(const RegularPolygon& polygon) const {
         std::vector<Point2D> vertices = polygon.Vertices();
         return point_in_polygon_ray_casting(point, vertices);
     }
 
-    bool operator()(const Circle &circle) const { return point.DistanceTo(circle.center_p) <= circle.radius; }
+    bool operator()(const Circle& circle) const { return point.DistanceTo(circle.center_p) <= circle.radius; }
 
 private:
-    bool point_in_polygon_ray_casting(const Point2D &p, const std::vector<Point2D> &vertices) const {
+    bool point_in_polygon_ray_casting(const Point2D& p, const std::vector<Point2D>& vertices) const {
         int intersections = 0;
         size_t n = vertices.size();
 
@@ -217,12 +219,12 @@ private:
 };
 
 struct ShapeToShapeDistanceVisitor {
-    std::optional<double> operator()(const Circle &c1, const Circle &c2) const {
+    std::optional<double> operator()(const Circle& c1, const Circle& c2) const {
         double centerDistance = c1.center_p.DistanceTo(c2.center_p);
         return std::max(0.0, centerDistance - c1.radius - c2.radius);
     }
 
-    std::optional<double> operator()(const Line &l1, const Line &l2) const {
+    std::optional<double> operator()(const Line& l1, const Line& l2) const {
         std::vector<double> distances = {queries::DistanceVisitor{l1.start}(l2), queries::DistanceVisitor{l1.end}(l2),
                                          queries::DistanceVisitor{l2.start}(l1), queries::DistanceVisitor{l2.end}(l1)};
         return *std::ranges::min_element(distances);
@@ -230,43 +232,40 @@ struct ShapeToShapeDistanceVisitor {
 
     // fallback for all unsupported combinations
     template <typename T, typename U>
-    std::optional<double> operator()(const T &, const U &) const {
+    std::optional<double> operator()(const T&, const U&) const {
         return std::nullopt;
     }
 };
 
-
 /*
-* Функции-помощники
-*/
-inline double DistanceToPoint(const Shape &shape, const Point2D &point) {
-
+ * Функции-помощники
+ */
+inline double DistanceToPoint(const Shape& shape, const Point2D& point) {
     /* ваш код с PointToShapeDistanceVisitor здесь*/
-    return 0.0;
+    return std::visit(PointToShapeDistanceVisitor{point}, shape);
 }
 
-inline BoundingBox GetBoundBox(const Shape &shape) {
-
+inline BoundingBox GetBoundBox(const Shape& shape) {
     /* ваш код с использованием метода BoundBox() здесь */
-    return {};
+    return std::visit([](const auto& s) { return s.BoundBox(); }, shape);
 }
 
-inline double GetHeight(const Shape &shape) {
-
+inline double GetHeight(const Shape& shape) {
     /* ваш код с использованием метода Height() здесь */
-    return 0.0;
+    return std::visit([](const auto& s) { return s.Height(); }, shape);
 }
 
-inline bool BoundingBoxesOverlap(const Shape &shape1, const Shape &shape2) {
-   BoundingBox bb1 = GetBoundBox(shape1);
-    BoundingBox bb2 = GetBoundBox(shape2);
+inline bool BoundingBoxesOverlap(const Shape& shape1, const Shape& shape2) {
+    /* ваш код здесь */
+    const BoundingBox bb1 = GetBoundBox(shape1);
+    const BoundingBox bb2 = GetBoundBox(shape2);
+
     return bb1.Overlaps(bb2);
 }
 
-std::optional<double> DistanceBetweenShapes(const Shape &shape1, const Shape &shape2) {
-
+inline std::optional<double> DistanceBetweenShapes(const Shape& shape1, const Shape& shape2) {
     /* ваш код с ShapeToShapeDistanceVisitor здесь*/
-    return std::nullopt;
+    return std::visit(ShapeToShapeDistanceVisitor{}, shape1, shape2);
 }
 
 }  // namespace geometry::queries
