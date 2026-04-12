@@ -1,4 +1,13 @@
-#include <gtest/gtest.h>
 #include "visualization.hpp"
+#include <gtest/gtest.h>
 
-TEST(VisualizationTest, SimpleCheck) { EXPECT_EQ(1 + 1, 2); }
+TEST(VisualizationTest, DrawShapesSignature) {
+    static_assert(requires(std::span<geometry::Shape> s) { geometry::visualization::Draw(s); });
+    SUCCEED();
+}
+
+TEST(VisualizationTest, DrawTrianglesSignature) {
+    static_assert(
+        requires(std::span<const geometry::triangulation::DelaunayTriangle> t) { geometry::visualization::Draw(t); });
+    SUCCEED();
+}
